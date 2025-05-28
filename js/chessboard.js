@@ -2,11 +2,12 @@ const BLACK = 0;
 const WHITE = 1;
 
 const shuffle = function (array) {
-  let currentIndex = array.length, temporaryValue, randomIndex;
+  let currentIndex = array.length,
+    temporaryValue,
+    randomIndex;
 
   // While there remain elements to shuffle...
   while (0 !== currentIndex) {
-
     // Pick a remaining element...
     randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex -= 1;
@@ -17,8 +18,9 @@ const shuffle = function (array) {
     array[randomIndex] = temporaryValue;
   }
 
-  return array;a
-}
+  return array;
+  a;
+};
 
 const Piece = {
   Pawn: 100,
@@ -27,8 +29,8 @@ const Piece = {
   Rook: 500,
   Queen: 900,
   King: 20000,
-  Empty: 0
-}
+  Empty: 0,
+};
 
 const bonusPos = {};
 bonusPos[Piece.Knight] = [
@@ -39,7 +41,7 @@ bonusPos[Piece.Knight] = [
   [-30, 0, 15, 20, 20, 15, 0, -30],
   [-30, 5, 10, 15, 15, 10, 5, -30],
   [-40, -20, 0, 5, 5, 0, -20, -40],
-  [-50, -40, -30, -30, -30, -30, -40, -50]
+  [-50, -40, -30, -30, -30, -30, -40, -50],
 ];
 
 bonusPos[Piece.Bishop] = [
@@ -50,7 +52,7 @@ bonusPos[Piece.Bishop] = [
   [-10, 0, 10, 10, 10, 10, 0, -10],
   [-10, 10, 10, 10, 10, 10, 10, -10],
   [-10, 5, 0, 0, 0, 0, 5, -10],
-  [-20, -10, -10, -10, -10, -10, -10, -20]
+  [-20, -10, -10, -10, -10, -10, -10, -20],
 ];
 
 bonusPos[Piece.Rook] = [
@@ -61,7 +63,7 @@ bonusPos[Piece.Rook] = [
   [-5, 0, 0, 0, 0, 0, 0, -5],
   [-5, 0, 0, 0, 0, 0, 0, -5],
   [-5, 0, 0, 0, 0, 0, 0, -5],
-  [0, 0, 0, 5, 5, 0, 0, 0]
+  [0, 0, 0, 5, 5, 0, 0, 0],
 ];
 
 bonusPos[Piece.Queen] = [
@@ -72,7 +74,7 @@ bonusPos[Piece.Queen] = [
   [0, 0, 5, 5, 5, 5, 0, -5],
   [-10, 5, 5, 5, 5, 5, 0, -10],
   [-10, 0, 5, 0, 0, 0, 0, -10],
-  [-20, -10, -10, -5, -5, -10, -10, -20]
+  [-20, -10, -10, -5, -5, -10, -10, -20],
 ];
 
 const kingMiddle = [
@@ -83,7 +85,7 @@ const kingMiddle = [
   [-20, -30, -30, -40, -40, -30, -30, -20],
   [-10, -20, -20, -20, -20, -20, -20, -10],
   [20, 20, 0, 0, 0, 0, 20, 20],
-  [20, 30, 10, 0, 0, 10, 30, 20]
+  [20, 30, 10, 0, 0, 10, 30, 20],
 ];
 
 const kingLate = [
@@ -94,16 +96,15 @@ const kingLate = [
   [-30, -10, 30, 40, 40, 30, -10, -30],
   [-30, -10, 20, 30, 30, 20, -10, -30],
   [-30, -30, 0, 0, 0, 0, -30, -30],
-  [-50, -30, -30, -30, -30, -30, -30, -50]
-]
+  [-50, -30, -30, -30, -30, -30, -30, -50],
+];
 bonusPos[Piece.King] = kingMiddle;
 
 const GameState = {
   HumanWin: 1,
   PCWin: -1,
-  Normal: 0
-}
-
+  Normal: 0,
+};
 
 const MAX_INT = 1000000000;
 
@@ -111,18 +112,29 @@ const moveToString = function (m, board) {
   const from = m.from;
   const to = m.to;
   const specialCondition = m.specialCondition;
-  const str = board.findNameOfPiece(from.container.type) + '(' + from.x + ',' + from.y + ')' + ' to '
-    + board.findNameOfPiece(to.container.type) + '(' + to.x + ',' + to.y + ')';
+  const str =
+    board.findNameOfPiece(from.container.type) +
+    "(" +
+    from.x +
+    "," +
+    from.y +
+    ")" +
+    " to " +
+    board.findNameOfPiece(to.container.type) +
+    "(" +
+    to.x +
+    "," +
+    to.y +
+    ")";
   if (specialCondition != undefined) {
-    if (specialCondition.name == 'castling') {
+    if (specialCondition.name == "castling") {
       return str + " - CASTLING";
-    } else if (specialCondition.name == 'upgradePawn') {
+    } else if (specialCondition.name == "upgradePawn") {
       return str + " - PAWN UPGRADED";
     }
   }
   return str;
-
-}
+};
 
 const Board = function (conf) {
   let MAX_DEPTH = 3;
@@ -159,76 +171,91 @@ const Board = function (conf) {
       if (Piece[key] == piece) return key;
     }
     return null;
-  }
+  };
 
   const Move = function (from, to, specialCondition) {
     this.from = from;
     this.to = to;
     if (specialCondition != undefined) this.specialCondition = specialCondition;
-
   };
 
   const makePieceContainer = function (type, color) {
     return {
       type: type,
-      color: color
+      color: color,
     };
-  }
+  };
 
-  const abs = function (a) { return a > 0 ? a : -a; }
+  const abs = function (a) {
+    return a > 0 ? a : -a;
+  };
   const isValid = function (move) {
-    const x = move.to.x, y = move.to.y;
+    const x = move.to.x,
+      y = move.to.y;
     const destination = move.to.container;
     const source = move.from.container;
-    return x > -1 && y > -1 && x < 8 && y < 8 && ((destination.type == Piece.Empty) || (destination.color != source.color));
-  }
+    return (
+      x > -1 &&
+      y > -1 &&
+      x < 8 &&
+      y < 8 &&
+      (destination.type == Piece.Empty || destination.color != source.color)
+    );
+  };
 
   const hash = function (x, y) {
     return x * 8 + y;
-  }
+  };
 
   const decode = function (h) {
     return [Math.floor(h / 8), h % 8];
-  }
+  };
 
   const get = function (x, y) {
     const h = hash(x, y);
     if (state[h] == undefined) {
       return {
         type: Piece.Empty,
-        color: 0
+        color: 0,
       };
     } else return state[h];
-  }
+  };
 
   const set = function (x, y, pieceContainer) {
     if (pieceContainer.type == Piece.Empty) {
       del(x, y);
     } else state[hash(x, y)] = pieceContainer;
-  }
+  };
 
   const del = function (x, y) {
     delete state[hash(x, y)];
-  }
+  };
 
   const makeMoveObject = function (fromx, fromy, tox, toy, specialCondition) {
     const from = {
       x: fromx,
       y: fromy,
-      container: get(fromx, fromy)
+      container: get(fromx, fromy),
     };
     const to = {
       x: tox,
       y: toy,
-      container: get(tox, toy)
-    }
+      container: get(tox, toy),
+    };
     return new Move(from, to, specialCondition);
-  }
+  };
 
   const pieceMoves = {};
   pieceMoves[Piece.King] = function (x, y) {
     const moves = [
-      [-1, 0], [0, -1], [1, 0], [0, 1], [-1, -1], [1, 1], [-1, 1], [1, -1]
+      [-1, 0],
+      [0, -1],
+      [1, 0],
+      [0, 1],
+      [-1, -1],
+      [1, 1],
+      [-1, 1],
+      [1, -1],
     ];
 
     const result = [];
@@ -240,22 +267,27 @@ const Board = function (conf) {
       if (isValid(m)) {
         result.push(m);
       }
-    })
+    });
 
     // castling move
     const isBottom = get(x, y).color == secondColor;
     const color = get(x, y).color;
-    const bottomRow = (isBottom) ? 7 : 0;
+    const bottomRow = isBottom ? 7 : 0;
     if (isKingMove[color] == 0 && x == bottomRow) {
       let sumOfSpace = 0;
       // check right
       for (let i = 5; i < 7; i++) sumOfSpace += get(x, i).type;
       let rook = get(x, 7);
-      if (sumOfSpace == 0 && rook.color == color && rook.type == Piece.Rook && isRightRookMove[color] == 0) {
+      if (
+        sumOfSpace == 0 &&
+        rook.color == color &&
+        rook.type == Piece.Rook &&
+        isRightRookMove[color] == 0
+      ) {
         // make special move
         const m = makeMoveObject(x, y, x, y + 2, {
-          name: 'castling',
-          secondMove: makeMoveObject(x, y + 3, x, y + 1)
+          name: "castling",
+          secondMove: makeMoveObject(x, y + 3, x, y + 1),
         });
         result.push(m);
       }
@@ -264,24 +296,34 @@ const Board = function (conf) {
       sumOfSpace = 0;
       for (let i = 1; i < 4; i++) sumOfSpace += get(x, i).type;
       rook = get(x, 0);
-      if (sumOfSpace == 0 && rook.color == color && rook.type == Piece.Rook && isLeftRookMove[color] == 0) {
+      if (
+        sumOfSpace == 0 &&
+        rook.color == color &&
+        rook.type == Piece.Rook &&
+        isLeftRookMove[color] == 0
+      ) {
         // make special move
         const m = makeMoveObject(x, y, x, y - 2, {
-          name: 'castling',
-          secondMove: makeMoveObject(x, 0, x, 3)
+          name: "castling",
+          secondMove: makeMoveObject(x, 0, x, 3),
         });
         result.push(m);
       }
     }
 
-
     return result;
-  }
+  };
 
   pieceMoves[Piece.Queen] = function (x, y) {
     const moves = [
-      [-1, 0], [0, -1], [1, 0], [0, 1],
-      [-1, -1], [1, 1], [-1, 1], [1, -1]
+      [-1, 0],
+      [0, -1],
+      [1, 0],
+      [0, 1],
+      [-1, -1],
+      [1, 1],
+      [-1, 1],
+      [1, -1],
     ];
 
     const result = [];
@@ -298,13 +340,16 @@ const Board = function (conf) {
           if (m.to.container.type != Piece.Empty) break;
         } else break;
       }
-    })
+    });
     return result;
-  }
+  };
 
   pieceMoves[Piece.Rook] = function (x, y) {
     const moves = [
-      [-1, 0], [0, -1], [1, 0], [0, 1],
+      [-1, 0],
+      [0, -1],
+      [1, 0],
+      [0, 1],
     ];
 
     const result = [];
@@ -321,13 +366,16 @@ const Board = function (conf) {
           if (m.to.container.type != Piece.Empty) break;
         } else break;
       }
-    })
+    });
     return result;
-  }
+  };
 
   pieceMoves[Piece.Bishop] = function (x, y) {
     const moves = [
-      [-1, -1], [1, 1], [-1, 1], [1, -1]
+      [-1, -1],
+      [1, 1],
+      [-1, 1],
+      [1, -1],
     ];
 
     const result = [];
@@ -344,22 +392,23 @@ const Board = function (conf) {
           if (m.to.container.type != Piece.Empty) break;
         } else break;
       }
-    })
+    });
     return result;
-  }
+  };
 
   pieceMoves[Piece.Pawn] = function (x, y) {
     const moves = [
-      [1, 1], [1, -1]
+      [1, 1],
+      [1, -1],
     ];
 
     const result = [];
-    const direction = (get(x, y).color == secondColor) ? -1 : 1;
+    const direction = get(x, y).color == secondColor ? -1 : 1;
     let m = {};
     const color = get(x, y).color;
     if ((direction == 1 && x == 6) || (direction == -1 && x == 1)) {
       m = makeMoveObject(x, y, x + direction, y, {
-        name: 'upgradePawn'
+        name: "upgradePawn",
       });
     } else {
       m = makeMoveObject(x, y, x + direction, y);
@@ -379,7 +428,7 @@ const Board = function (conf) {
       let m = {};
       if ((direction == 1 && i == 7) || (direction == -1 && i == 0)) {
         m = makeMoveObject(x, y, i, j, {
-          name: 'upgradePawn'
+          name: "upgradePawn",
         });
       } else {
         m = makeMoveObject(x, y, i, j);
@@ -389,11 +438,18 @@ const Board = function (conf) {
       }
     });
     return result;
-  }
+  };
 
   pieceMoves[Piece.Knight] = function (x, y) {
     const moves = [
-      [1, 2], [2, 1], [-1, 2], [2, -1], [1, -2], [-2, 1], [-1, -2], [-2, -1]
+      [1, 2],
+      [2, 1],
+      [-1, 2],
+      [2, -1],
+      [1, -2],
+      [-2, 1],
+      [-1, -2],
+      [-2, -1],
     ];
 
     const result = [];
@@ -405,10 +461,10 @@ const Board = function (conf) {
       if (isValid(m)) {
         result.push(m);
       }
-    })
+    });
 
     return result;
-  }
+  };
 
   if (conf === undefined) {
     set(0, 0, makePieceContainer(Piece.Rook, firstColor));
@@ -435,7 +491,6 @@ const Board = function (conf) {
   }
 
   const makeMove = function (move) {
-
     set(move.to.x, move.to.y, move.from.container);
     del(move.from.x, move.from.y);
     if (move.from.container.type == Piece.King) {
@@ -452,14 +507,14 @@ const Board = function (conf) {
       }
     }
     if (move.specialCondition != undefined) {
-      if (move.specialCondition.name == 'castling') {
+      if (move.specialCondition.name == "castling") {
         makeMove(move.specialCondition.secondMove);
-      } else if (move.specialCondition.name == 'upgradePawn') {
+      } else if (move.specialCondition.name == "upgradePawn") {
         const color = move.from.container.color;
         set(move.to.x, move.to.y, makePieceContainer(Piece.Queen, color));
       }
     }
-  }
+  };
 
   const undoMove = function (move) {
     set(move.from.x, move.from.y, move.from.container);
@@ -478,13 +533,12 @@ const Board = function (conf) {
       }
     }
     if (move.specialCondition != undefined) {
-      if (move.specialCondition.name == 'castling') {
+      if (move.specialCondition.name == "castling") {
         undoMove(move.specialCondition.secondMove);
-      } else if (move.specialCondition.name == 'upgradePawn') {
-
+      } else if (move.specialCondition.name == "upgradePawn") {
       }
     }
-  }
+  };
 
   const getHumanOrPCPositions = function (humanOrPC) {
     let checkColor = PC_COLOR;
@@ -500,30 +554,31 @@ const Board = function (conf) {
     shuffle(result);
     result.sort(function (a, b) {
       return get(a[0], a[1]).type - get(b[0], b[1]).type;
-    })
+    });
     return result;
-  }
+  };
 
   const getAllPossibleMoves = function (humanOrPC) {
     const positions = getHumanOrPCPositions(humanOrPC);
     let result = [];
     for (let i = 0; i < positions.length; i++) {
-      const x = positions[i][0], y = positions[i][1];
+      const x = positions[i][0],
+        y = positions[i][1];
       const pieceType = get(x, y).type;
       if (pieceType != Piece.Empty) {
         const possibleMoves = pieceMoves[pieceType](x, y);
         result = result.concat(possibleMoves);
-      };
+      }
     }
     return result;
-  }
+  };
 
   const getHumanPositions = function () {
     return getHumanOrPCPositions(true);
-  }
+  };
   const getPCPositions = function () {
     return getHumanOrPCPositions(false);
-  }
+  };
 
   const calculateScore = function () {
     let result = 0;
@@ -545,13 +600,18 @@ const Board = function (conf) {
       }
     }
     return result;
-  }
+  };
   let calcCount = 0;
 
-  const tryMove = function (humanOrPC, depth, alpha, beta) {
+  // Alpha-beta pruning algorithm
+  const tryMoveAlphaBeta = function (humanOrPC, depth, alpha, beta) {
     calcCount++;
     let bestSolutions = [];
-    if (depth == 0) return { move: null, bestScore: humanOrPC ? -calculateScore(state) : calculateScore(state) };
+    if (depth == 0)
+      return {
+        move: null,
+        bestScore: humanOrPC ? -calculateScore(state) : calculateScore(state),
+      };
     const MINVALUE = -MAX_INT;
     let maxScoreCanHave = MINVALUE - 1;
     let rightMove = null;
@@ -560,14 +620,14 @@ const Board = function (conf) {
     const getBestResult = () => {
       if (depth === MAX_DEPTH) {
         if (bestSolutions.length === 0) {
-          console.log('never??');
-          return {move: rightMove, bestScore: maxScoreCanHave};
+          console.log("never??");
+          return { move: rightMove, bestScore: maxScoreCanHave };
         }
-        console.log('bestSolutions', bestSolutions.length);
+        console.log("bestSolutions", bestSolutions.length);
         return bestSolutions[(Math.random() * bestSolutions.length) | 0];
       }
-      return {move: rightMove, bestScore: maxScoreCanHave};
-    }
+      return { move: rightMove, bestScore: maxScoreCanHave };
+    };
 
     for (let ii = 0; ii < allPossibleMoves.length; ii++) {
       const move = allPossibleMoves[ii];
@@ -576,30 +636,124 @@ const Board = function (conf) {
         undoMove(move);
         return { move: move, bestScore: -MINVALUE };
       }
-      const bestOfTheOther = -tryMove(humanOrPC ^ 1, depth - 1, -beta, -alpha).bestScore;
+      const bestOfTheOther = -tryMoveAlphaBeta(
+        humanOrPC ^ 1,
+        depth - 1,
+        -beta,
+        -alpha
+      ).bestScore;
 
       undoMove(move);
       if (bestOfTheOther > maxScoreCanHave) {
         maxScoreCanHave = bestOfTheOther;
         rightMove = move;
         if (depth === MAX_DEPTH) {
-          bestSolutions = [{move: move, bestScore: maxScoreCanHave}];
+          bestSolutions = [{ move: move, bestScore: maxScoreCanHave }];
         }
       } else if (bestOfTheOther === maxScoreCanHave && depth === MAX_DEPTH) {
-        bestSolutions.push({move: move, bestScore: maxScoreCanHave})
+        bestSolutions.push({ move: move, bestScore: maxScoreCanHave });
       }
       if (maxScoreCanHave > alpha) alpha = maxScoreCanHave;
       if (alpha >= beta) return getBestResult();
     }
     return getBestResult();
-  }
+  };
+
+  // BFS algorithm for chess move search
+  const tryMoveBFS = function (humanOrPC) {
+    calcCount++;
+    const queue = [];
+    const visited = new Set();
+    let bestMove = null;
+    let bestScore = humanOrPC ? MAX_INT : -MAX_INT;
+
+    // Add all initial moves to queue
+    const initialMoves = shuffle(getAllPossibleMoves(humanOrPC));
+    initialMoves.forEach((move) => {
+      queue.push({
+        move: move,
+        depth: 1,
+        path: [move],
+      });
+    });
+
+    while (queue.length > 0 && calcCount < 10000) {
+      const current = queue.shift();
+      const moveKey = JSON.stringify(current.move);
+
+      if (visited.has(moveKey)) continue;
+      visited.add(moveKey);
+
+      // Make the move and evaluate
+      makeMove(current.move);
+      calcCount++;
+
+      // Check for immediate king capture
+      if (current.move.to.container.type === Piece.King) {
+        undoMove(current.move);
+        return {
+          move: current.path[0],
+          bestScore: humanOrPC ? -MAX_INT : MAX_INT,
+        };
+      }
+
+      // Evaluate current board position
+      const score = calculateScore();
+
+      // Update best move if this is better
+      if (
+        (humanOrPC && score < bestScore) ||
+        (!humanOrPC && score > bestScore)
+      ) {
+        bestScore = score;
+        bestMove = current.path[0]; // First move in the path
+      }
+
+      // If we haven't reached max depth, add next level moves
+      if (current.depth < MAX_DEPTH) {
+        const nextMoves = shuffle(getAllPossibleMoves(!humanOrPC));
+        nextMoves.forEach((nextMove) => {
+          queue.push({
+            move: nextMove,
+            depth: current.depth + 1,
+            path: [...current.path, nextMove],
+          });
+        });
+      }
+
+      undoMove(current.move);
+    }
+
+    return { move: bestMove, bestScore: bestScore };
+  };
+
+  // Main function that can use either algorithm
+  const tryMove = function (humanOrPC, depth, alpha, beta) {
+    let algorithm = "bfs";
+    if (algorithm === "alpha-beta") {
+      console.log("Using Alpha-Beta Pruning");
+      return tryMoveAlphaBeta(humanOrPC, depth, alpha, beta);
+    } else if (algorithm === "bfs") {
+      console.log("Using BFS");
+      return tryMoveBFS(humanOrPC);
+    }
+  };
+
+  // Handler for algorithm selection message
+  addEventListener("message", function (e) {
+    if (e.data.type === "setAlgorithm") {
+      conf = conf || {};
+      conf.algorithm = e.data.algorithm;
+      console.log("Algorithm set to: " + e.data.algorithm);
+    }
+  });
 
   this.get = get;
   this.getHumanPositions = getHumanPositions;
   this.getPCPositions = getPCPositions;
   this.setMaxDepth = function (depth) {
     MAX_DEPTH = depth;
-  }
+  };
 
   // allow player to make a move from (i,j) to (x,y)
   this.makeMove = function (move) {
@@ -628,24 +782,25 @@ const Board = function (conf) {
     } else if (!isPCKingAlive) {
       return GameState.HumanWin;
     } else return GameState.Normal;
-  }
+  };
 
   this.getPCResponse = function () {
     calcCount = 0;
+    algorithm = conf.algorithm;
     const res = tryMove(false, MAX_DEPTH, -MAX_INT, MAX_INT).move;
-    console.log('Calculation steps: ' + calcCount);
+    console.log("Calculation steps: " + calcCount);
     return res;
-  }
+  };
 
   this.getPossibleMovesFrom = function (x, y) {
     const container = get(x, y);
     if (container.type == Piece.Empty) return [];
     return pieceMoves[container.type](x, y);
-  }
+  };
 
   this.isHumanPiece = function (x, y) {
     return get(x, y).type != Piece.Empty && get(x, y).color == HUMAN_COLOR;
-  }
+  };
 
   this.getConfiguration = function () {
     const conf = {};
@@ -659,7 +814,7 @@ const Board = function (conf) {
     conf.PC_COLOR = PC_COLOR;
     conf.MAX_DEPTH = MAX_DEPTH;
     return conf;
-  }
+  };
 
   this.findNameOfPiece = findNameOfPiece;
 };
@@ -667,9 +822,9 @@ const Board = function (conf) {
 Board.findBestMove = function (conf) {
   const board = new Board(conf);
   return board.getPCResponse();
-}
+};
 
-addEventListener('message', function (e) {
+addEventListener("message", function (e) {
   const bestMove = Board.findBestMove(e.data);
   postMessage(bestMove);
 });
