@@ -727,15 +727,62 @@ const Board = function (conf) {
     return { move: bestMove, bestScore: bestScore };
   };
 
+  // Negamax w/ α–β pruning
+  const tryMoveNegamax = function (humanOrPC, depth, alpha, beta) {
+    calcCount++;
+
+    // 1) Leaf node: evaluate from PC’s perspective
+    if (depth === 0) {
+      const rawScore = calculateScore(); // positive = good for PC
+      // if it's human’s turn, flip sign
+      const signed = humanOrPC ? -rawScore : rawScore;
+      return { move: null, bestScore: signed };
+    }
+
+    // 2) Initialize
+    let bestMove = null;
+    let maxScore = -MAX_INT;
+
+    // 3) Try every move
+    const moves = shuffle(getAllPossibleMoves(humanOrPC));
+    for (let m of moves) {
+      makeMove(m);
+
+      // Recurse: flip humanOrPC, swap bounds, and negate score
+      const result = tryMoveNegamax(!humanOrPC, depth - 1, -beta, -alpha);
+      const score = -result.bestScore;
+
+      undoMove(m);
+
+      // 4) α–β bookkeeping
+      if (score > maxScore) {
+        maxScore = score;
+        bestMove = m;
+      }
+      if (score > alpha) {
+        alpha = score;
+      }
+      if (alpha >= beta) {
+        // cutoff
+        break;
+      }
+    }
+
+    return { move: bestMove, bestScore: maxScore };
+  };
+
   // Main function that can use either algorithm
   const tryMove = function (humanOrPC, depth, alpha, beta) {
-    let algorithm = "bfs";
+    let algorithm = "negamax";
     if (algorithm === "alpha-beta") {
       console.log("Using Alpha-Beta Pruning");
       return tryMoveAlphaBeta(humanOrPC, depth, alpha, beta);
     } else if (algorithm === "bfs") {
       console.log("Using BFS");
       return tryMoveBFS(humanOrPC);
+    } else if (algorithm === "negamax") {
+      console.log("Using Negamax with Alpha-Beta Pruning");
+      return tryMoveNegamax(humanOrPC, depth, alpha, beta);
     }
   };
 
