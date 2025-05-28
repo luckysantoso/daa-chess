@@ -1,77 +1,180 @@
-// js/index.js
-import { Board }                   from '../chess/board.js';
-import { moveToString }            from '../chess/model/move.js';
-import { PieceType, BLACK, WHITE, nameOf } 
-                                   from '../chess/model/piece.js';
+const num_threads = 1;
+const MT = new Multithread(num_threads);
+
+let currentTurn = 'human'; // human turn
+let choosingState = 'none';
+
+let game_depth = 3;
+
+const FIRST_BACKGROUND_COLOR = '#AB7B2A';
+const SECOND_BACKGROUND_COLOR = '#FFFAD5';
+
+let cells = [];
+let moveTo = [];
+for (let i = 0; i < 8; i++) {
+  moveTo[i] = [];
+  for (let j = 0; j < 8; j++) {
+    moveTo[i][j] = null;
+  }
+}
 
 let board = null;
-let currentTurn = 'human';
-let choosingState = 'none';
-let fromx, fromy;
 
-// Helper untuk menentukan URL gambar bidak
-function getModelOf(container) {
-  if (container.type === PieceType.Empty) return '';
-  const type = nameOf(container.type);
-  const color = container.color === BLACK ? 'black' : 'white';
-  return `images/${type}_${color}.png`;
-}
-
-function getCell(x, y) {
-  return $(`[x=${x}][y=${y}]`);
-}
-
-function setCellContainer(x, y, container) {
-  const img = cells[x][y].find('img');
-  const url = getModelOf(container);
-  if (url) img.attr('src', url);
-  else    img.removeAttr('src');
-}
-
-// (Highlight helpers — sama persis seperti sebelumnya)
-function setCellStateSelecting(x, y) { /* ... */ }
-function setCellStateHighlighting(x, y) { /* ... */ }
-function setCellStateNormal(x, y) { /* ... */ }
-function checkState(x, y) { /* ... */ }
-
-// Inisialisasi grid & event handling
-let cells = [];
-$(document).ready(() => {
-  // Bangun papan HTML
-  let rows = '';
-  for (let i = 0; i < 8; i++) {
-    cells[i] = [];
-    let row = '<tr>';
-    for (let j = 0; j < 8; j++) {
-      const bg = ((i + j) % 2 === 0) ? FIRST_BACKGROUND_COLOR : SECOND_BACKGROUND_COLOR;
-      row += `<td x="${i}" y="${j}" bgcolor="${bg}">
-                <div class="highlight_overlay">
-                  <div class="chosen_overlay"><img/></div>
-                </div>
-              </td>`;
+const getModelOf = function (container) {
+  let type = null;
+  let url = 'images/';
+  for (let key in Piece) {
+    if (Piece[key] == container.type) {
+      type = key;
+      break;
     }
-    row += '</tr>';
-    rows += row;
   }
-  $('table#chessboard').append(rows);
-  $('table#chessboard td').click(cellOnClick);
+  if (type == 'Empty') return '';
+  url += type + '_';
+  if (container.color == BLACK) url += 'black.png';
+  else url += 'white.png';
+  return url;
+}
 
-  // Mulai game
-  startGame();
-});
+const getCell = function (x, y) {
+  return $("[x=" + x + "][y=" + y + "]");
+}
 
-// Fungsi untuk memulai / mereset game
-function startGame() {
+const setCellContainer = function (x, y, container) {
+  let modelUrl = getModelOf(container);
+  if (modelUrl.length > 0)
+    cells[x][y].find('img').attr('src', modelUrl);
+  else cells[x][y].find('img').removeAttr('src');
+}
+
+const setCellStateSelecting = function (x, y) {
+  const highlightDiv = cells[x][y].find('.highlight_overlay');
+  const chosenDiv = highlightDiv.find('.chosen_overlay');
+  chosenDiv.addClass("enabled");
+}
+
+const setCellStateHighlighting = function (x, y) {
+  const highlightDiv = cells[x][y].find('.highlight_overlay');
+  const chosenDiv = highlightDiv.find('.chosen_overlay');
+  highlightDiv.addClass("enabled");
+  chosenDiv.removeClass("enabled");
+}
+
+const setCellStateNormal = function (x, y) {
+  const highlightDiv = cells[x][y].find('.highlight_overlay');
+  const chosenDiv = highlightDiv.find('.chosen_overlay');
+  highlightDiv.removeClass("enabled");
+  chosenDiv.removeClass("enabled");
+}
+
+const checkState = function (x, y) {
+  const highlightDiv = cells[x][y].find('.highlight_overlay');
+  const chosenDiv = highlightDiv.find('.chosen_overlay');
+  if (highlightDiv.hasClass("enabled")) return "highlight";
+  if (chosenDiv.hasClass("enabled")) return "chosen";
+  return "normal";
+}
+
+let fromx, tox;
+
+const makeMove = function (fromx, fromy, tox, toy, move) {
+  choosingState = 'none';
+  $('.enabled').removeClass('enabled');
+  let m = moveTo[tox][toy];
+  if (move != undefined) {
+    m = move;
+  }
+  let log = board.makeMove(m);
+  $('textarea#moveLog').append(currentTurn.toUpperCase() + ": " + log + '\n');
+  setCellContainer(fromx, fromy, board.get(fromx, fromy));
+  setCellContainer(tox, toy, board.get(tox, toy));
+  if (m.specialCondition != undefined) {
+    updateBoard();
+  }
+}
+
+let chooseCell = function (x, y) {
+  let possibleMoves = board.getPossibleMovesFrom(x, y);
+  $('.enabled').removeClass('enabled');
+  setCellStateSelecting(x, y);
+  fromx = x; fromy = y;
+  possibleMoves.forEach(function (move) {
+    setCellStateHighlighting(move.to.x, move.to.y);
+    moveTo[move.to.x][move.to.y] = move;
+  });
+  choosingState = 'chosen';
+}
+
+let enableBoard = function () {
+  $('div#chessdiv').removeClass('disabled');
+}
+
+let disableBoard = function () {
+  $('div#chessdiv').addClass('disabled');
+}
+
+let setStatus = function (text) {
+  $('p#status').text(text);
+}
+
+let checkWin = function () {
+  let whoWin = board.checkWin();
+  if (whoWin != GameState.Normal) {
+    choosingState = 'over';
+    disableBoard();
+    if (whoWin == GameState.HumanWin) {
+      setStatus('Congratulations, You Win!')
+    } else {
+      setStatus('Sorry, You lose!')
+    }
+    return true;
+  }
+  return false;
+}
+
+const startGame = function () {
   board = new Board();
+  board.setMaxDepth(game_depth);
   setStatus('Your turn, You are white!');
   initBoard();
   choosingState = 'none';
   currentTurn = 'human';
+  $('.enabled').removeClass('enabled');
   $('#moveLog').text('');
 }
 
-// Render ulang seluruh papan sesuai state Board
-function updateBoard() {
+const chessEngine = new Worker('js/chessboard.js');
+chessEngine.addEventListener('message', function (e) {
+  const move = e.data;
+  makeMove(move.from.x, move.from.y, move.to.x, move.to.y, move);
+  currentTurn = 'human';
+  choosingState = 'none';
+  $('.enabled').removeClass('enabled');
+  setStatus('Your turn, You are white!');
+  if (checkWin()) return;
+})
+
+const cellOnClick = function () {
+  if (choosingState == 'over') return;
+  if (currentTurn != 'human') return;
+  const x = parseInt($(this).attr("x"));
+  const y = parseInt($(this).attr("y"));
+  const state = checkState(x, y);
+  if (currentTurn == 'human') {
+    if (board.isHumanPiece(x, y)) {
+      chooseCell(x, y);
+    } else if (choosingState == 'chosen' && checkState(x, y) == 'highlight') {
+      makeMove(fromx, fromy, x, y);
+
+      if (checkWin()) return;
+      currentTurn = 'pc';
+      setStatus('PC turn, he is thinking...');
+      chessEngine.postMessage(board.getConfiguration());
+    }
+  }
+}
+
+const updateBoard = function () {
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
       setCellContainer(i, j, board.get(i, j));
@@ -79,8 +182,8 @@ function updateBoard() {
   }
 }
 
-// Inisialisasi sekali, memanggil updateBoard ke setiap cell
-function initBoard() {
+const initBoard = function () {
+  for (let i = 0; i < 8; i++) cells[i] = [];
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
       cells[i][j] = getCell(i, j);
@@ -89,84 +192,35 @@ function initBoard() {
   }
 }
 
-// Mengeksekusi langkah: simpan log, perbarui UI
-function makeMove(fromx, fromy, tox, toy, move) {
-  choosingState = 'none';
-  $('.enabled').removeClass('enabled');
-
-  // Bila move sudah disediakan, pakai itu;  
-  // jika tidak, ambil dari array moveTo (optional)
-  const m = move || moveTo[fromx][fromy][tox][toy];
-
-  board.makeMove(m);
-  const log = moveToString(m);
-  $('#moveLog').append(`${currentTurn.toUpperCase()}: ${log}\n`);
-
-  updateBoard();
+const changeBackgroundMode = function (mode) {
+  if (mode == 0) {
+    $("body").css('background-color', '#FDFDFD');
+    $("body").css('color', '#333');
+  } else {
+    $("body").css('background-color', '#333');
+    $("body").css('color', '#FDFDFD');
+  }
 }
 
-// Pemilihan bidak manusia
-function chooseCell(x, y) {
-  const possible = board.allMoves(true)
-                        .filter(m => m.from.x === x && m.from.y === y);
-  $('.enabled').removeClass('enabled');
-  setCellStateSelecting(x, y);
-  fromx = x; fromy = y;
-  possible.forEach(m => {
-    setCellStateHighlighting(m.to.x, m.to.y);
-    // simpan move di array dua dimensi:
-    moveTo[m.to.x][m.to.y] = m;
+$(document).ready(() => {
+  $("input[name=difficulty]").click(function () {
+    game_depth = parseInt($(this).val());
+    console.log("Set game depth to " + game_depth);
   });
-  choosingState = 'chosen';
-}
-
-// Handle klik user
-function cellOnClick() {
-  if (choosingState === 'over' || currentTurn !== 'human') return;
-  const x = +$(this).attr('x');
-  const y = +$(this).attr('y');
-  const state = checkState(x, y);
-
-  if (board.isHuman(x, y)) {
-    chooseCell(x, y);
-  } else if (choosingState === 'chosen' && state === 'highlight') {
-    makeMove(fromx, fromy, x, y);
-
-    if (checkWin()) return;
-    currentTurn = 'pc';
-    setStatus('PC turn, he is thinking…');
-
-    // Kirim konfigurasi ke Worker
-    chessEngine.postMessage(board.getConfiguration());
+  $("input[name='backgroundmode']").click(function () {
+    changeBackgroundMode(parseInt($(this).val()));
+  })
+  let str = '';
+  for (let i = 0; i < 8; i++) {
+    let row = '<tr>';
+    for (let j = 0; j < 8; j++) {
+      let bgcolor = ((i + j) % 2 == 0) ? FIRST_BACKGROUND_COLOR : SECOND_BACKGROUND_COLOR;
+      row += '<td x="' + i + '" y="' + j + '" bgcolor="' + bgcolor + '">  <div class="highlight_overlay"><div class="chosen_overlay"><img/></div></div> </td>';
+    }
+    row += '</tr>'
+    str += row;
   }
-}
-
-// Setup Web Worker untuk AI
-const chessEngine = new Worker('chess/board.js', { type: 'module' });
-chessEngine.addEventListener('message', e => {
-  const m = e.data;
-  makeMove(m.from.x, m.from.y, m.to.x, m.to.y, m);
-  currentTurn = 'human';
-  setStatus('Your turn, You are white!');
-  checkWin();
+  $('table#chessboard').append(str);
+  $('table#chessboard').find('td').click(cellOnClick);
+  startGame();
 });
-
-// Status dan pengecekan pemenang
-function setStatus(txt) { $('#status').text(txt); }
-function checkWin() {
-  const w = board.checkWin();
-  if (w !== 0) {
-    disableBoard();
-    choosingState = 'over';
-    setStatus(w === 1 ? 'You Win!' : 'You Lose!');
-    return true;
-  }
-  return false;
-}
-
-function disableBoard() { $('#chessdiv').addClass('disabled'); }
-function enableBoard() { $('#chessdiv').removeClass('disabled'); }
-
-// Array untuk menyimpan move sementara
-const moveTo = Array.from({ length: 8 }, () => Array(8).fill(null));
-// Inisialisasi moveTo dengan objek Move kosong

@@ -17,7 +17,7 @@ const shuffle = function (array) {
     array[randomIndex] = temporaryValue;
   }
 
-  return array;
+  return array;a
 }
 
 const Piece = {

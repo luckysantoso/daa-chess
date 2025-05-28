@@ -61,6 +61,35 @@ export class Board {
     this.history = [];
   }
 
+    /**
+   * Return a JSON-serializable snapshot of this Board
+   * for sending to a Worker.
+   */
+  getConfiguration() {
+    return {
+      state: Array.from(this.state.entries()),
+      castlingRights: this.castlingRights,
+      humanColor: this.human,
+      maxDepth: this.maxDepth
+    };
+  }
+
+  /** Legacy: allow setting search depth at runtime */
+  setMaxDepth(d) {
+    this.maxDepth = d;
+  }
+
+  /** Legacy: possible moves from a given square */
+  getPossibleMovesFrom(x, y) {
+    return this.allMoves(true).filter(m => m.from.x === x && m.from.y === y);
+  }
+
+  /** Legacy alias for isHuman */
+  isHumanPiece(x, y) {
+    return this.isHuman(x, y);
+  }
+
+
   /* ---------- inisialisasi papan standar ---------- */
   #initStartingPosition() {
     const back = [PieceType.Rook , PieceType.Knight, PieceType.Bishop,
