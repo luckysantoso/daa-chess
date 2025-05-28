@@ -1,12 +1,58 @@
 body {
-  font-family: 'Open Sans';
-  background-color: #333;
-  color: #FDFDFD;
+  font-family: 'Open Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.3s, color 0.3s;
 }
 
-div#main {
-  width: 800px;
-  margin:auto;
+/* Light Mode Styles */
+body.light-mode {
+  background-color: #f0f2f5; /* Light background */
+  color: #333; /* Dark text */
+}
+
+/* Night Mode Styles */
+body.night-mode {
+  background-color: #2c2f33; /* Dark background */
+  color: #fdfdfd; /* Light text */
+}
+
+/* Navbar */
+.navbar {
+  background-color: #36393f; /* Darker than body for distinction */
+  color: #fdfdfd;
+  padding: 15px 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.navbar-brand {
+  font-size: 1.5em;
+  font-weight: 700;
+}
+
+/* Main Container Layout */
+#main-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Space between board and panel */
+  padding: 20px;
+  max-width: 1200px;
+  margin: 20px auto;
+}
+
+#chess-board-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+#chessdiv {
+  border: 1px solid #555; /* Border around the chessboard */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
 table#chessboard img {
@@ -18,7 +64,6 @@ table#chessboard img {
 img {
     display: none;
 }
-
 
 img[src] {
    display:block;
@@ -32,14 +77,32 @@ table#chessboard td {
   padding: 0px;
   width: 64px;
   height: 64px;
+  background-color: #769656; /* Dark square */
 }
 
+table#chessboard td:nth-child(even):nth-child(odd),
+table#chessboard tr:nth-child(even) td:nth-child(odd),
+table#chessboard tr:nth-child(odd) td:nth-child(even) {
+    background-color: #eeeed2; /* Light square */
+}
+
+/* Night mode board colors */
+body.night-mode table#chessboard td {
+  background-color: #6a8d56; /* Darker green for night mode */
+}
+
+body.night-mode table#chessboard td:nth-child(even):nth-child(odd),
+body.night-mode table#chessboard tr:nth-child(even) td:nth-child(odd),
+body.night-mode table#chessboard tr:nth-child(odd) td:nth-child(even) {
+    background-color: #d1d9c0; /* Slightly darker light square for night mode */
+}
+
+
 table#chessboard, th, td {
-    border: 1px solid #DDD;
+    border: 1px solid rgba(0,0,0,0.1); /* Subtle border for squares */
 }
 
 table#chessboard {
-  align:center;
   border-spacing:0px;
   border-collapse: collapse;
 }
@@ -59,7 +122,6 @@ div.chosen_overlay {
   width: 100%;
   height:100%;
   z-index: 10;
-
   background-color: rgba(238,226,4,0);
 }
 
@@ -73,3 +135,328 @@ div.piece_container {
   height:52px;
 }
 
+/* Board Controls (below chessboard) */
+.board-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%; /* Adjust as needed */
+  justify-content: center;
+}
+
+.board-controls button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.2s ease;
+}
+
+.board-controls button:hover {
+  background-color: #0056b3;
+}
+
+.board-controls #status {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+}
+
+/* Right Panel Styles */
+#right-panel {
+  background-color: #36393f; /* Slightly lighter than body in night mode, darker in light mode */
+  border-radius: 8px;
+  padding: 20px;
+  width: 300px; /* Fixed width for the panel */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+body.light-mode #right-panel {
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.panel-section {
+  background-color: #424549; /* Darker background for sections */
+  border-radius: 6px;
+  padding: 15px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+body.light-mode .panel-section {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  box-shadow: none;
+}
+
+.panel-header {
+  font-size: 1.2em;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #fdfdfd;
+}
+
+body.light-mode .panel-header {
+  color: #333;
+}
+
+.panel-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Toggle Switch (Night Mode) */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 28px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+.toggle-label {
+  font-size: 1em;
+  color: #fdfdfd;
+}
+
+body.light-mode .toggle-label {
+  color: #333;
+}
+
+
+/* Dropdown (Difficulty) */
+#difficulty-select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid #666;
+  background-color: #555;
+  color: #fdfdfd;
+  font-size: 1em;
+  appearance: none; /* Remove default dropdown arrow */
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%23fdfdfd" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 20px;
+  cursor: pointer;
+}
+
+#algorithm-select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid #666;
+  background-color: #555;
+  color: #fdfdfd;
+  font-size: 1em;
+  appearance: none; /* Remove default dropdown arrow */
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%23fdfdfd" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 20px;
+  cursor: pointer;
+}
+
+body.light-mode #difficulty-select {
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #333;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%23333333" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+}
+
+/* Game Log */
+.game-log-section {
+  flex-grow: 1; /* Allows the log to take up available space */
+  display: flex;
+  flex-direction: column;
+}
+
+.game-log-content {
+  flex-grow: 1;
+}
+
+#moveLog {
+  width: calc(100% - 16px); /* Account for padding */
+  height: 250px; /* Adjust height as needed */
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #666;
+  background-color: #555;
+  color: #fdfdfd;
+  font-family: monospace;
+  font-size: 0.9em;
+  resize: vertical; /* Allow vertical resizing */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+body.light-mode #moveLog {
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #333;
+}
+
+/* Panel Footer */
+.panel-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #555; /* Separator line */
+}
+
+body.light-mode .panel-footer {
+  border-top: 1px solid #eee;
+}
+
+.report-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.95em;
+  transition: background-color 0.2s ease;
+}
+
+.report-button:hover {
+  background-color: #218838;
+}
+
+.saved-analysis {
+  color: #aaa;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.saved-analysis i {
+  color: #007bff; /* Icon color */
+}
+
+/* Responsive adjustments if needed */
+@media (max-width: 900px) {
+  #main-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  #right-panel {
+    width: 90%; /* Adjust width for smaller screens */
+    max-width: 400px;
+  }
+}
+
+.footer {
+  display: flex; /* Menggunakan Flexbox */
+  align-items: center; /* Menyusun item secara vertikal di tengah */
+  justify-content: space-between; /* Memberi ruang di antara logo dan teks */
+  padding: 20px 40px; /* Sesuaikan padding agar tidak terlalu mepet */
+  background-color: #36393f; /* Sama dengan navbar untuk konsistensi */
+  color: #fdfdfd;
+  margin-top: 40px; /* Space above the footer */
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+}
+
+body.light-mode .footer {
+  background-color: #ffffff;
+  color: #333;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+  border-top: 1px solid #eee;
+}
+
+.its-logo {
+  max-width: 60px; /* Ukuran logo disesuaikan agar tidak terlalu besar */
+  height: auto;
+  margin-right: 20px; /* Memberi jarak antara logo dan teks */
+}
+
+body.light-mode .its-logo {
+  filter: none; /* Kembalikan warna asli logo untuk background terang */
+}
+
+.creator-names {
+  flex-grow: 1; /* Biarkan teks mengambil sisa ruang */
+  text-align: right; /* Teks rata kanan */
+}
+
+.creator-names p {
+  margin: 0; /* Hapus margin default pada paragraf */
+  font-size: 0.95em;
+  line-height: 1.4;
+  white-space: nowrap; /* Mencegah teks patah baris */
+  overflow: hidden; /* Sembunyikan overflow jika teks terlalu panjang */
+  text-overflow: ellipsis; /* Tambahkan elipsis jika teks terpotong */
+}
+
+/* Responsive adjustments for footer */
+@media (max-width: 768px) {
+  .footer {
+    flex-direction: column; /* Ubah tata letak menjadi kolom pada layar kecil */
+    text-align: center;
+    padding: 20px;
+  }
+
+  .its-logo {
+    margin-right: 0;
+    margin-bottom: 15px; /* Tambahkan margin bawah saat dalam mode kolom */
+  }
+
+  .creator-names {
+    text-align: center; /* Teks di tengah saat dalam mode kolom */
+  }
+
+  .creator-names p {
+    white-space: normal; /* Izinkan teks patah baris pada layar kecil */
+  }
+}
